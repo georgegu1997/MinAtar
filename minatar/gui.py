@@ -26,7 +26,7 @@ from platform import system as platform
 #
 ################################################################################################################
 class GUI:
-    def __init__(self, env_name, n_channels):
+    def __init__(self, env_name, n_channels, visualize=True):
         self.n_channels = n_channels
 
         # The seaborn color_palette cubhelix is used to assign visually distinct colors to each channel for the env
@@ -36,24 +36,25 @@ class GUI:
         bounds = [i for i in range(self.n_channels + 2)]
         self.norm = colors.BoundaryNorm(bounds, self.n_channels + 1)
 
-        self.root = Tk.Tk()
-        self.root.title(env_name)
-        self.root.config(background='white')
+        if visualize:
+            self.root = Tk.Tk()
+            self.root.title(env_name)
+            self.root.config(background='white')
 
-        self.root.attributes("-topmost", True)
-        if platform() == 'Darwin':  # How Mac OS X is identified by Python
-            system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "Python" to true' ''')
-        self.root.focus_force()
+            self.root.attributes("-topmost", True)
+            if platform() == 'Darwin':  # How Mac OS X is identified by Python
+                system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "Python" to true' ''')
+            self.root.focus_force()
 
-        self.text_message = Tk.StringVar()
-        self.label = Tk.Label(self.root, textvariable=self.text_message)
+            self.text_message = Tk.StringVar()
+            self.label = Tk.Label(self.root, textvariable=self.text_message)
 
-        self.fig = Figure()
-        self.ax = self.fig.add_subplot(111)
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
-        self.canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
-        self.key_press_handler = self.canvas.mpl_connect('key_press_event', self.on_key_event)
-        self.key_release_handler = self.canvas.mpl_connect('key_press_event', lambda x: None)
+            self.fig = Figure()
+            self.ax = self.fig.add_subplot(111)
+            self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
+            self.canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
+            self.key_press_handler = self.canvas.mpl_connect('key_press_event', self.on_key_event)
+            self.key_release_handler = self.canvas.mpl_connect('key_press_event', lambda x: None)
 
     # Set the message for the label on screen
     def set_message(self, str):
