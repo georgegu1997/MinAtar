@@ -117,6 +117,34 @@ class Env:
             state[car[1],back_x, trail] = 1
         return state
 
+    # Process the game state and render it into a segmentation mask where each channel represents a different type of car
+    def state_seg(self):
+        state = np.zeros((10, 10, 5*2 + 1), dtype=bool)
+
+        # The first channel is the player
+        state[self.pos, 4, 0] = 1
+
+        # The next 5*2 channels are the cars, each channel contains cars with a unique combination of speed and direction
+        for car in self.cars:
+            x, y, speed = car[0], car[1], car[3] # x is rightward, and y is downward
+            # Channel for this car. Speed is from 1 to 5 (-5 to -1)
+            if speed > 0:
+                c = speed # 1, 2, 3, 4, 5
+            else:
+                c = abs(speed) + 5 # 6, 7, 8, 9, 10
+
+            state[y, x, c] = 1
+
+            back_x = x - 1 if speed > 0 else x + 1
+            if (back_x < 0):
+                back_x = 9
+            elif (back_x > 9):
+                back_x = 0
+
+            state[y, back_x, c] = 1
+        
+        return state
+
     # Randomize car speeds and directions, also reset their position if initialize=True
     def _randomize_cars(self, initialize=False):
         speeds = self.random.randint(1,6,8)

@@ -55,18 +55,29 @@ while e < NUM_EPISODES:
         # Obtain s_prime, unused by random agent, but inluded for illustration
         s_prime = env.state()
 
-        plt.close('all')
-        numerical_state = np.amax(s_prime * np.reshape(np.arange(gui.n_channels) + 1, (1, 1, -1)), 2) + 0.5
-        image = gui.cmap(gui.norm(numerical_state))
-        image = image[:, :, :3] # Simply drop the alpha channel
-        image = (image * 255).round().astype(np.uint8)
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(str(ep_folder / ('obs_%06d.png'%(t))), image)
+        # plt.close('all')
+        # numerical_state = np.amax(s_prime * np.reshape(np.arange(gui.n_channels) + 1, (1, 1, -1)), 2) + 0.5
+        # image = gui.cmap(gui.norm(numerical_state))
+        # image = image[:, :, :3] # Simply drop the alpha channel
+        # image = (image * 255).round().astype(np.uint8)
+        # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        # cv2.imwrite(str(ep_folder / ('obs_%06d.png'%(t))), image)
 
-        # print(image)
-        # print(image.shape)
-        # plt.imshow(image)
+        state = s_prime
+        numerical_state = np.amax(state * np.reshape(np.arange(gui.n_channels) + 1, (1, 1, -1)), 2) + 0.5
+        # plt.imshow(numerical_state, cmap=gui.cmap, norm=gui.norm, interpolation='none')
         # plt.show()
+
+        seg = env.env.state_seg()
+        print(seg.shape)
+        print(seg.dtype)
+        print(seg.max())
+        print(seg.min())
+        fig, axes = plt.subplots(3, 4)
+        for i in range(seg.shape[2]):
+            axes[i//4, i%4].imshow(seg[:, :, i], cmap='gray')
+        axes[-1, -1].imshow(numerical_state, cmap=gui.cmap, norm=gui.norm, interpolation='none')
+        plt.show()
         
         # plt.imshow(numerical_state, cmap=gui.cmap, norm=gui.norm, interpolation='none')
         # plt.savefig(str(ep_folder / ('obs_%06d.png'%(t))))
