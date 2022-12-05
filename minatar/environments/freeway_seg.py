@@ -69,8 +69,8 @@ class Env:
         # Update cars
         for car in self.cars:
             if(car[0:2]==[4,self.pos]):
-                r += -0.01
                 self.pos = 9
+                r -= 0.01
             if(car[2]==0):
                 car[2]=abs(car[3])
                 car[0]+=1 if car[3]>0 else -1
@@ -79,8 +79,8 @@ class Env:
                 elif(car[0]>9):
                     car[0]=0
                 if(car[0:2]==[4,self.pos]):
-                    r += -0.01
                     self.pos = 9
+                    r -= 0.01
             else:
                 car[2]-=1
 
@@ -95,28 +95,32 @@ class Env:
     def difficulty_ramp(self):
         return None        
 
-    # Process the game-state into the 10x10xn state provided to the agent and return
+    # Process the game state and render it into a segmentation mask where each channel represents a different type of car
     def state(self):
-        state = np.zeros((10,10,len(self.channels)),dtype=bool)
-        state[self.pos,4,self.channels['chicken']] = 1
+        state = np.zeros((10, 10, 5*2 + 1), dtype=bool)
+
+        # The first channel is the player
+        state[self.pos, 4, 0] = 1
+
+        # The next 5*2 channels are the cars, each channel contains cars with a unique combination of speed and direction
         for car in self.cars:
-            state[car[1],car[0], self.channels['car']] = 1
-            back_x = car[0]-1 if car[3]>0 else car[0]+1
-            if(back_x<0):
-                back_x=9
-            elif(back_x>9):
-                back_x=0
-            if(abs(car[3])==1):
-                trail = self.channels['speed1']
-            elif(abs(car[3])==2):
-                trail = self.channels['speed2']
-            elif(abs(car[3])==3):
-                trail = self.channels['speed3']
-            elif(abs(car[3])==4):
-                trail = self.channels['speed4']
-            elif(abs(car[3])==5):
-                trail = self.channels['speed5']
-            state[car[1],back_x, trail] = 1
+            x, y, speed = car[0], car[1], car[3] # x is rightward, and y is downward
+            # Channel for this car. Speed is from 1 to 5 (-5 to -1)
+            if speed > 0:
+                c = speed # 1, 2, 3, 4, 5
+            else:
+                c = abs(speed) + 5 # 6, 7, 8, 9, 10
+
+            state[y, x, c] = 1
+
+            back_x = x - 1 if speed > 0 else x + 1
+            if (back_x < 0):
+                back_x = 9
+            elif (back_x > 9):
+                back_x = 0
+
+            state[y, back_x, c] = 1
+        
         return state
 
     # Randomize car speeds and directions, also reset their position if initialize=True
@@ -142,7 +146,7 @@ class Env:
 
     # Dimensionality of the game-state (10x10xn)
     def state_shape(self):
-        return [10,10,len(self.channels)]
+        return [10,10,11]
 
     # Subset of actions that actually have a unique impact in this environment
     def minimal_action_set(self):
