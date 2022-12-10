@@ -15,10 +15,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import cv2
 
-NUM_EPISODES = 200
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--game", "-g", type=str)
+parser.add_argument("--n_epochs", "-e", type=int, default=1000)
 args = parser.parse_args()
 
 env = Environment(args.game)
@@ -28,14 +27,14 @@ e = 0
 returns = []
 num_actions = env.num_actions()
 
-# Run NUM_EPISODES episodes and log all returns
-while e < NUM_EPISODES:
+# Run args.n_epochs episodes and log all returns
+while e < args.n_epochs:
     # Initialize the return for every episode
     G = 0.0
 
     # For generating the dataset
     t = 0
-    ep_folder = Path('./generated_dataset/ep_%06d/' % e)
+    ep_folder = Path('./generated_dataset/%s/ep_%06d/' % (args.game, e))
     if not os.path.exists(ep_folder):
         os.makedirs(ep_folder)
 
@@ -63,24 +62,32 @@ while e < NUM_EPISODES:
         # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         # cv2.imwrite(str(ep_folder / ('obs_%06d.png'%(t))), image)
 
-        state = s_prime
-        numerical_state = np.amax(state * np.reshape(np.arange(gui.n_channels) + 1, (1, 1, -1)), 2) + 0.5
+        # state = s_prime
+        # numerical_state = np.amax(state * np.reshape(np.arange(gui.n_channels) + 1, (1, 1, -1)), 2) + 0.5
         # plt.imshow(numerical_state, cmap=gui.cmap, norm=gui.norm, interpolation='none')
         # plt.show()
 
-        seg = env.env.state_seg()
-        print(seg.shape)
-        print(seg.dtype)
-        print(seg.max())
-        print(seg.min())
-        fig, axes = plt.subplots(3, 4)
-        for i in range(seg.shape[2]):
-            axes[i//4, i%4].imshow(seg[:, :, i], cmap='gray')
-        axes[-1, -1].imshow(numerical_state, cmap=gui.cmap, norm=gui.norm, interpolation='none')
-        plt.show()
+        # seg = env.env.state_seg()
+        # print(seg.shape)
+        # print(seg.dtype)
+        # print(seg.max())
+        # print(seg.min())
+        # fig, axes = plt.subplots(3, 4)
+        # for i in range(seg.shape[2]):
+        #     axes[i//4, i%4].imshow(seg[:, :, i], cmap='gray')
+        # axes[-1, -1].imshow(numerical_state, cmap=gui.cmap, norm=gui.norm, interpolation='none')
+        # plt.show()
+
+        # plt.imshow(s_prime)
+        # plt.show()
         
         # plt.imshow(numerical_state, cmap=gui.cmap, norm=gui.norm, interpolation='none')
         # plt.savefig(str(ep_folder / ('obs_%06d.png'%(t))))
+
+        image = s_prime
+        image = (image * 255).round().astype(np.uint8)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(str(ep_folder / ('obs_%06d.png'%(t))), image)
 
         G += reward
         t += 1
@@ -91,6 +98,6 @@ while e < NUM_EPISODES:
     # Store the return for each episode
     returns.append(G)
 
-print("Avg Return: " + str(numpy.mean(returns))+"+/-"+str(numpy.std(returns)/numpy.sqrt(NUM_EPISODES)))
+print("Avg Return: " + str(numpy.mean(returns))+"+/-"+str(numpy.std(returns)/numpy.sqrt(args.n_epochs)))
 
 

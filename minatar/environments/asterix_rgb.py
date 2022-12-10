@@ -4,6 +4,7 @@
 # Tian Tian (ttian@ualberta.ca)                                                                                #
 ################################################################################################################
 import numpy as np
+from minatar.gui import GUI
 
 
 #####################################################################################################################
@@ -40,6 +41,8 @@ class Env:
         else:
             self.random = random_state
         self.reset()
+
+        self.gui = GUI("asterix", len(self.channels), visualize=False)
 
     # Update environment according to agent action
     def act(self, a):
@@ -133,7 +136,13 @@ class Env:
                 back_x = x[0]-1 if x[2] else x[0]+1
                 if(back_x>=0 and back_x<=9):
                     state[x[1], back_x, self.channels['trail']] = 1
-        return state
+
+        # Conver the binary state representation to a 3-channel RGB image
+        numerical_state = np.amax(state * np.reshape(np.arange(self.gui.n_channels) + 1, (1, 1, -1)), 2) + 0.5
+        image = self.gui.cmap(self.gui.norm(numerical_state)) # RGBA in [0,1]
+        image = image[:, :, :3] # Simply drop the alpha channel
+        
+        return image
 
     # Reset to start state for new episode
     def reset(self):
