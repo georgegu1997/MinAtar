@@ -160,7 +160,7 @@ class Env:
 
     # Dimensionality of the game-state (10x10xn)
     def state_shape(self):
-        return [10,10,len(self.channels)]
+        return [10,10,3]
 
     # Subset of actions that actually have a unique impact in this environment
     def minimal_action_set(self):
