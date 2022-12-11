@@ -67,7 +67,7 @@ while e < args.n_epochs:
         # plt.imshow(numerical_state, cmap=gui.cmap, norm=gui.norm, interpolation='none')
         # plt.show()
 
-        # seg = env.env.state_seg()
+        # seg = s_prime
         # print(seg.shape)
         # print(seg.dtype)
         # print(seg.max())
@@ -75,7 +75,6 @@ while e < args.n_epochs:
         # fig, axes = plt.subplots(3, 4)
         # for i in range(seg.shape[2]):
         #     axes[i//4, i%4].imshow(seg[:, :, i], cmap='gray')
-        # axes[-1, -1].imshow(numerical_state, cmap=gui.cmap, norm=gui.norm, interpolation='none')
         # plt.show()
 
         # plt.imshow(s_prime)

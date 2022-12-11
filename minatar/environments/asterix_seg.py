@@ -27,11 +27,18 @@ shot_cool_down = 5
 #####################################################################################################################
 class Env:
     def __init__(self, ramping = True, random_state = None):
+        # self.channels ={
+        #     'player':0,
+        #     'enemy':1,
+        #     'trail':2,
+        #     'gold':3
+        # }
         self.channels ={
             'player':0,
-            'enemy':1,
-            'trail':2,
-            'gold':3
+            'enemy_left':1,
+            'enemy_right':2,
+            'gold_left':3,
+            'gold_right':4,
         }
         self.action_map = ['n','l','u','r','d','f']
         self.ramping = ramping
@@ -128,11 +135,16 @@ class Env:
         state[self.player_y,self.player_x,self.channels['player']] = 1
         for x in self.entities:
             if(x is not None):
-                c = self.channels['gold'] if x[3] else self.channels['enemy']
+                # c = self.channels['gold'] if x[3] else self.channels['enemy']
+                # state[x[1], x[0],c] = 1
+                # back_x = x[0]-1 if x[2] else x[0]+1
+                c = 3 if x[3] else 1     # 1 for enemy and 3 for gold
+                c = c+1 if x[2] else c   # If moving right, then channel increments by 1
                 state[x[1], x[0],c] = 1
                 back_x = x[0]-1 if x[2] else x[0]+1
+
                 if(back_x>=0 and back_x<=9):
-                    state[x[1], back_x, self.channels['trail']] = 1
+                    state[x[1], back_x, c] = 1
         return state
 
     # Reset to start state for new episode
